@@ -1,0 +1,85 @@
+﻿@using QueryStringEncryption.ViewModels
+@model JsonViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+<h3>Unencrypted</h3>
+<p>Num: @Model.Num</p>
+<p>Text: @Model.Text</p>
+<h3>Encrypted</h3>
+<p>Num: @Model.Num.EncryptedValue</p>
+<p>Text: @Model.Text.EncryptedValue</p>
+<hr />
+<h3>QueryString</h3>
+<li>
+    <a asp-controller="Home" asp-action="Get" asp-route-Num="@Model.Num.EncryptedValue" asp-route-Text="@Model.Text.EncryptedValue">Get</a>
+</li>
+<h3>application/x-www-form-urlencoded</h3>
+<li>
+    <form id="postForm" method="post" action="/Home/PostForm" style="display: inline-block;">
+        <input type="hidden" name="Num" value="@Model.Num.EncryptedValue">
+        <input type="hidden" name="Text" value="@Model.Text.EncryptedValue">
+        <input type="submit" value="PostFormSubmit">
+    </form>
+</li>
+<li>
+    <input type="button" id="postFormAjax" value="PostFormAjax">
+</li>
+<h3>multipart/form-data</h3>
+<li>
+    <form id="postFormMultipart" method="post" enctype="multipart/form-data" action="/Home/PostForm" style="display: inline-block;">
+        <input type="hidden" name="Num" value="@Model.Num.EncryptedValue">
+        <input type="hidden" name="Text" value="@Model.Text.EncryptedValue">
+        <input type="submit" value="PostFormMultipartSubmit">
+    </form>
+</li>
+<li>
+    <input type="button" id="postFormMultipartAjax" value="PostFormMultipartAjax">
+</li>
+<h3>application/json</h3>
+<li>
+    <input type="button" id="postJson" value="PostJson">
+</li>
+<li>
+    <a asp-controller="Home" asp-action="ResponseJson">ResponseJson</a>
+</li>
+
+@section Scripts  {
+    <script>
+        $('#postFormAjax').click(function () {
+            let body = $('#postForm').serialize();
+
+            $.ajax({
+                url: "/Home/PostForm",
+                method: "POST",
+                contentType: "application/x-www-form-urlencoded",
+                data: body
+            })
+        });
+
+        $('#postFormMultipartAjax').click(function () {
+            let form = $('#postFormMultipart')[0];
+            let formData = new FormData(form);
+
+            $.ajax({
+                url: "/Home/PostForm",
+                method: "POST",
+                contentType: false,
+                processData: false,
+                data: formData
+            })
+        });
+
+        $('#postJson').click(function () {
+            $.ajax({
+                url: "/Home/PostJson",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    Num: '@Html.Raw(Model.Num.EncryptedValue)',
+                    Text: '@Html.Raw(Model.Text.EncryptedValue)',
+                })
+            })
+        });
+    </script>
+}
